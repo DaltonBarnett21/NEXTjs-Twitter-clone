@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  username String    @unique
+  password String
+  avatar   String?
+  tweets   Tweet[]
+  media    Media[]
+  likes    Like[]
+  comments Comment[]
+  retweets Retweet[]
+  profile  Profile?
+}
+
+model Retweet {
+  id        Int      @id @default(autoincrement())
+  text      String?
+  tweet     Tweet?   @relation(fields: [tweetId], references: [id])
+  tweetId   Int      @unique
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String?
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  tweetId   Int      @unique
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  tweetId   Int      @unique
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  tweet     Tweet?   @relation(fields: [tweetId], references: [id])
+  tweetId   Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Tweet {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  text      String?
+  retweets  Retweet[]
+  likes     Like[]
+  comments  Comment[]
+  media     Media?
+  createdAt DateTime  @default(now())
+}
+
+model Profile {
+  id         Int      @id @default(autoincrement())
+  bio        String   @default("")
+  coverImage String   @default("")
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int      @unique
+  createdAt  DateTime @default(now())
+}
